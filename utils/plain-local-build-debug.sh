@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script builds dependencies with debug information (linux)
+
 # Tip: to clean before running, you can issue a `conan remove "*" -c`
 # Warning: this command will totally erase your cache
 # You may also want to clean /tmp/conan-cache, to avoid reinjection of previous
@@ -17,7 +19,7 @@ export GCC_VERSION=14   # Note: even for gcc > 14
 export WORKSPACE=.
 export CXX_VERSION=20
 export CMAKE_POLICY_VERSION_MINIMUM=3.25
-export DEPS_BUILD_TYPE=Release  # Release/Debug/RelWithDebInfo/MinSizeRel, as needed
+export DEPS_BUILD_TYPE=Debug  # Release/Debug/RelWithDebInfo/MinSizeRel, as needed
 export cache_dir
 
 # Run conan

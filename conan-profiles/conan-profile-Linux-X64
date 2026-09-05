@@ -12,7 +12,6 @@ compiler.cstd=gnu17
 [options]
 openvdb/*:simd=AVX
 minizip-ng/*:with_libcomp=False
-#gtk/system:version=3
 
 
 [conf]
@@ -28,7 +27,7 @@ tools.cmake.cmaketoolchain:user_toolchain+={{os.getenv("LUX_PROFILE_DIR", profil
 tools.build:cflags+=["-fsanitize=address", "-fno-omit-frame-pointer"]
 tools.build:cxxflags+=["-fsanitize=address", "-fno-omit-frame-pointer"]
 
-tools.build:sharedlinkflags=["-fsanitize=address"]
+tools.build:sharedlinkflags+=["-fsanitize=address"]
 tools.cmake.cmaketoolchain:extra_variables={ 'COMPILER_RT_BUILD_SHARED_ASAN':'ON', 'CMAKE_BUILD_PARALLEL_LEVEL':'' }
 openvdb/*:tools.cmake.cmaketoolchain:extra_variables={ 'COMPILER_RT_BUILD_SHARED_ASAN':'ON', 'USE_CCACHE':'OFF' }
 
@@ -39,6 +38,13 @@ openvdb/*:tools.cmake.cmaketoolchain:extra_variables={ 'USE_CCACHE':'OFF' }
 {% endif %}
 
 onetbb/*:tools.cmake.cmaketoolchain:extra_variables={ 'CMAKE_VERBOSE_MAKEFILE': 'ON' }
+libultrahdr/*:tools.build:cxxflags+=["-include cstdint"]
+
+# The following options prevent symbol interpositions from Blender libs in tbb
+# symbol resolution (when working with Blender) and thus avoid version bugs
+# between tbb provided by Lux and tbb provided by Blender
+onetbb/*:tools.build:cxxflags+=["-Wl,-Bsymbolic", "-Wl,-Bsymbolic-functions"]
+
 libultrahdr/*:tools.build:cxxflags+=["-include cstdint"]
 
 # vim: ft=conf
