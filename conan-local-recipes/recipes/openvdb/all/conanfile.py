@@ -88,7 +88,9 @@ class OpenVDBConan(ConanFile):
     def _compilers_min_version(self):
         # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L56-L84
         return {
-            "msvc": "1930",
+            # OpenVDB 13 requires VS2022 (v14.3x) — conan msvc version
+            # notation is three digits ("193"), not "1930".
+            "msvc": "193",
             "Visual Studio": "16",
             "gcc": "11.2.1",
             "clang": "5.0",
