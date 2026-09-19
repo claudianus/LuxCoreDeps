@@ -40,6 +40,10 @@ class ImguiFileDialogConan(ConanFile):
             self,
             path=os.path.join(self.source_folder, "CMakeLists.txt"),
             content=(
+                # Leading newline: upstream 0.6.8 CMakeLists.txt has no
+                # trailing newline, so a plain append glues find_package
+                # onto the last upstream line and CMake fails to parse.
+                "\n"
                 "find_package(imgui)\n"
                 "target_link_libraries(ImGuiFileDialog PRIVATE imgui::imgui)\n"
                 "install(TARGETS ImGuiFileDialog)\n"
