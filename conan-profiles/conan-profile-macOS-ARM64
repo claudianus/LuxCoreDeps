@@ -17,6 +17,8 @@ minizip-ng/*:with_zlib=True
 minizip-ng/*:with_libcomp=False
 embree/*:shared=True
 opensubdiv/*:with_metal=True
+oidn/*:with_device_metal=True
+oidn/*:metal_embed_source=True
 
 [buildenv]
 PKG_ARCH=armv8

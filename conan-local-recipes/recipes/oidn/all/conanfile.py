@@ -5,7 +5,7 @@
 import os
 import shutil
 from pathlib import Path
-from conan.tools.files import get, copy, rmdir, rename, rm, replace_in_file
+from conan.tools.files import get, copy, rmdir, rename, rm, replace_in_file, patch
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan import ConanFile
 from conan.tools.scm import Git
@@ -20,6 +20,8 @@ class OidnConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     package_type = "library"
 
+    exports_sources = "patches/*"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -30,6 +32,10 @@ class OidnConan(ConanFile):
         "device_cuda_api": ["Driver", "RuntimeStatic", "RuntimeShared"],
         "with_device_hip": [True, False],
         "with_device_metal": [True, False],
+        # Build the Metal device module without the Xcode-only `metal`/`metallib`
+        # toolchain: embed preprocessed shader source and compile it at runtime
+        # via newLibraryWithSource: (same strategy LuxCore uses for its kernels).
+        "metal_embed_source": [True, False],
         "with_filter_rt": [True, False],
         "with_filter_rtlightmap": [True, False],
         "with_apps": [True, False],
@@ -46,6 +52,7 @@ class OidnConan(ConanFile):
         "device_cuda_api": "Driver",
         "with_device_hip": False,
         "with_device_metal": False,
+        "metal_embed_source": False,
         "with_filter_rt": True,
         "with_filter_rtlightmap": True,
         "with_apps": True,
@@ -106,6 +113,13 @@ class OidnConan(ConanFile):
         deps.generate()
 
     def build(self):
+        if self.options.get_safe("with_device_metal") and self.options.get_safe("metal_embed_source"):
+            patch(
+                self,
+                base_path=Path(self.source_folder) / "oidn",
+                patch_file=Path(self.export_sources_folder) / "patches" / f"oidn-{self.version}-metal-runtime-compile.patch",
+                strip=0,
+            )
         cmake = CMake(self)
         cmake.configure(cli_args=[], build_script_folder=Path(self.folders.source) / "oidn")
         cmake.build(cli_args=["--verbose", "--clean-first"])
@@ -146,11 +160,12 @@ class OidnConan(ConanFile):
                     f"{library_name}_core",
                 ]
             elif self.settings.os == "Macos":
-                self.cpp_info.libs = [
-                    f"{library_name}.{version}",
-                    f"{library_name}_device_cpu.{version}",
-                    f"{library_name}_core.{version}",
-                ]
+                self.cpp_info.libs = [f"{library_name}.{version}"]
+                if self.options.get_safe("with_device_cpu"):
+                    self.cpp_info.libs.append(f"{library_name}_device_cpu.{version}")
+                if self.options.get_safe("with_device_metal"):
+                    self.cpp_info.libs.append(f"{library_name}_device_metal.{version}")
+                self.cpp_info.libs.append(f"{library_name}_core.{version}")
         else:
             # Static
             # Warning: library order matters!
