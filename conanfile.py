@@ -11,7 +11,11 @@ import os
 
 # Gather here the various dependency versions, for convenience
 # (in alphabetic order)
-BOOST_VERSION = "1.91.0"
+# Pinned to 1.88: the conan-center boost recipe drops the compiled
+# 'system' component starting 1.89 (header-only upstream), and
+# openvdb/12.1.1's recipe still requires 'boost::system', breaking
+# dependency resolution on all platforms (CI run 35422976143).
+BOOST_VERSION = "1.88.0"
 EIGEN_VERSION = "5.0.1"
 EMBREE_VERSION = "4.4.1"
 FMT_VERSION = "12.2.0"
