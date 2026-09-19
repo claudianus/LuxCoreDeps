@@ -11,10 +11,11 @@ import os
 
 # Gather here the various dependency versions, for convenience
 # (in alphabetic order)
-# Pinned to 1.88: the conan-center boost recipe drops the compiled
-# 'system' component starting 1.89 (header-only upstream), and
-# openvdb/12.1.1's recipe still requires 'boost::system', breaking
-# dependency resolution on all platforms (CI run 35422976143).
+# Pinned to 1.88 for stability: the conan-center boost recipe drops the
+# compiled 'system' component starting 1.89 (header-only upstream).
+# openvdb/12.1.1's recipe still required 'boost::system' (CI run
+# 35422976143); the local openvdb/13.0.0 recipe no longer does, so the
+# pin is now conservative rather than forced.
 BOOST_VERSION = "1.88.0"
 EIGEN_VERSION = "5.0.1"
 EMBREE_VERSION = "4.4.1"
@@ -37,9 +38,8 @@ ONETBB_VERSION = "2023.1.0"  # Reminder: do the same in oidn
 OPENEXR_VERSION = "3.4.14"
 OPENJPH_VERSION = "0.30.1"
 OPENSUBDIV_VERSION = "3.7.0"
-OPENVDB_VERSION = "12.1.1"
+OPENVDB_VERSION = "13.0.0"
 PYBIND11_VERSION = "3.0.1"
-ROBIN_HOOD_HASHING_VERSION = "3.11.5"
 SPDLOG_VERSION = "1.17.0"
 TSL_ROBIN_MAP_VERSION = "1.4.0"
 ZSTD_VERSION = "1.5.7"
@@ -113,10 +113,6 @@ class LuxCoreDeps(ConanFile):
         )
 
         # Header only deps - make them transitive
-        self.requires(
-            f"robin-hood-hashing/{ROBIN_HOOD_HASHING_VERSION}",
-            transitive_headers=True
-        )
         self.requires(
             f"tsl-robin-map/{TSL_ROBIN_MAP_VERSION}",
             transitive_headers=True,
